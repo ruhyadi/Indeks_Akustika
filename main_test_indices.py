@@ -18,7 +18,10 @@ from acoustic_index import *
 import yaml
 from scipy import signal
 import csv
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--i', default='', help='Path to input file or directory.')
 
 
 if __name__ == '__main__':
@@ -27,7 +30,7 @@ if __name__ == '__main__':
     yml_file = 'yaml/config_014_butter.yaml'
 
     # Read signal -------------------------------------
-    filename = 'audio_files/BALMER-02_0_20150620_0445.wav'
+    filename = args.i
 
 
     file = AudioFile(filename, verbose=True)
