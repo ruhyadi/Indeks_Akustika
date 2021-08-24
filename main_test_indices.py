@@ -20,8 +20,10 @@ from scipy import signal
 import csv
 import argparse
 
-args = argparse.ArgumentParser()
-args.add_argument('--i', default='', help='Path to input file or directory.')
+parser = argparse.ArgumentParser()
+parser.add_argument('--i', default='', help='Path to input file or directory.')
+
+args = parser.parse_args()
 
 
 if __name__ == '__main__':
