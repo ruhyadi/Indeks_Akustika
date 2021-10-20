@@ -22,6 +22,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--i', default='', help='Path to input file or directory.')
+parser.add_argument('--o', default='', help='Path to output file or directory.')
 
 args = parser.parse_args()
 
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     # Pre-processing -----------------------------------------------------------------------------------
     if 'Filtering' in data_config:
         if data_config['Filtering']['type'] == 'butterworth':
-            print('- Pre-processing - High-Pass Filtering:', data_config['Filtering'])
+            #print('- Pre-processing - High-Pass Filtering:', data_config['Filtering'])
             freq_filter = data_config['Filtering']['frequency']
             Wn = freq_filter/float(file.niquist)
             order = data_config['Filtering']['order']
@@ -55,7 +56,7 @@ if __name__ == '__main__':
             #plt.show()
             file.process_filtering(signal.filtfilt(b, a, file.sig_float))
         elif data_config['Filtering']['type'] == 'windowed_sinc':
-            print('- Pre-processing - High-Pass Filtering:', data_config['Filtering'])
+            #print('- Pre-processing - High-Pass Filtering:', data_config['Filtering'])
             freq_filter = data_config['Filtering']['frequency']
             fc = freq_filter / float(file.sr)
             roll_off = data_config['Filtering']['roll_off']
@@ -76,7 +77,7 @@ if __name__ == '__main__':
 
 
     # Compute Indices -----------------------------------------------------------------------------------
-    print('- Compute Indices')
+    print('ANALISIS INDEKS BIOAKUSTIK')
     ci = data_config['Indices'] # use to simplify the notation
     for index_name in ci:  # iterate over the index names (key of dictionary in the yml file)
 
@@ -101,28 +102,31 @@ if __name__ == '__main__':
 
 
         elif index_name == 'Acoustic_Evenness_Index':
-            print('\tCompute', index_name)
+            print('\tMenghitung Acoustic Evenness Index (AEI)')
+            index_name_ = 'AEI'
             methodToCall = globals().get(ci[index_name]['function'])
             freq_band_Hz = ci[index_name]['arguments']['max_freq'] / ci[index_name]['arguments']['freq_step']
             windowLength = int(file.sr / freq_band_Hz)
             spectro,_ = compute_spectrogram(file, windowLength=windowLength, windowHop= windowLength, scale_audio=True, square=False, windowType='hanning', centered=False, normalized= False )
             main_value = methodToCall(spectro, freq_band_Hz, **ci[index_name]['arguments'])
-            file.indices[index_name] = Index(index_name, main_value=main_value)
+            file.indices[index_name] = Index(index_name_, main_value=main_value)
 
 
         elif index_name == 'Bio_acoustic_Index':
-            print('\tCompute', index_name)
+            print('\tMenghitung Bio Acoustic Index (BIO)')
+            index_name_ = 'BIO'
             spectro, frequencies = compute_spectrogram(file, **ci[index_name]['spectro'])
             methodToCall = globals().get(ci[index_name]['function'])
             main_value = methodToCall(spectro, frequencies, **ci[index_name]['arguments'])
-            file.indices[index_name] = Index(index_name, main_value=main_value)
+            file.indices[index_name] = Index(index_name_, main_value=main_value)
 
 
         elif index_name == 'Normalized_Difference_Sound_Index':
-            print('\tCompute', index_name)
+            print('\tMenghitung Normalized Difference Sound Index (NDSI)')
+            index_name_ = 'NDSI'
             methodToCall = globals().get(ci[index_name]['function'])
             main_value = methodToCall(file, **ci[index_name]['arguments'])
-            file.indices[index_name] = Index(index_name, main_value=main_value)
+            file.indices[index_name] = Index(index_name_, main_value=main_value)
 
 
         elif index_name == 'RMS_energy':
@@ -141,18 +145,20 @@ if __name__ == '__main__':
 
 
         elif index_name == 'Spectral_Entropy':
-            print('\tCompute', index_name)
+            print('\tMenghitung Spectral Entropy (H)')
+            index_name_ = 'Spectral H'
             spectro, _ = compute_spectrogram(file, **ci[index_name]['spectro'])
             methodToCall = globals().get(ci[index_name]['function'])
             main_value = methodToCall(spectro)
-            file.indices[index_name] = Index(index_name, main_value=main_value)
+            file.indices[index_name] = Index(index_name_, main_value=main_value)
 
 
         elif index_name == 'Temporal_Entropy':
-            print('\tCompute', index_name)
+            print('\tMenghitung Temporal Entropy (H)')
+            index_name_ = 'Temporal H'
             methodToCall = globals().get(ci[index_name]['function'])
             main_value = methodToCall(file, **ci[index_name]['arguments'])
-            file.indices[index_name] = Index(index_name, main_value=main_value)
+            file.indices[index_name] = Index(index_name_, main_value=main_value)
 
 
         elif index_name == 'ZCR':
@@ -220,8 +226,9 @@ if __name__ == '__main__':
 
 
     # Output Indices -----------------------------------------------------------------------------------
-    print('- Write Indices')
-    writer = csv.writer(open('dict.csv', 'w'))
+    #print('- Write Indices')
+    #writer = csv.writer(open('dict.csv', 'w'))
+    writer = csv.writer(open(f'{args.o}.csv', 'w'))
 
     keys = ['filename']
     values = [file.file_name]
